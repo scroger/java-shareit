@@ -4,21 +4,25 @@ import ru.practicum.shareit.user.dto.CreateUserRequestDto;
 import ru.practicum.shareit.user.dto.UpdateUserRequestDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.Optional;
+
 public class UserMapper {
 
     public static User map(CreateUserRequestDto createUserRequestDto) {
-        return User.builder()
-                .id(null)
-                .name(createUserRequestDto.name())
-                .email(createUserRequestDto.email())
-                .build();
+        User user = new User();
+
+        user.setId(null);
+        user.setName(createUserRequestDto.name());
+        user.setEmail(createUserRequestDto.email());
+
+        return user;
     }
 
     public static User map(UpdateUserRequestDto userRequestDto, User user) {
-        return user.toBuilder()
-                .name(null != userRequestDto.name() ? userRequestDto.name() : user.name())
-                .email(null != userRequestDto.email() ? userRequestDto.email() : user.email())
-                .build();
+        Optional.ofNullable(userRequestDto.name()).ifPresent(user::setName);
+        Optional.ofNullable(userRequestDto.email()).ifPresent(user::setEmail);
+
+        return user;
     }
 
 }
