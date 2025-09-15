@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
     public Collection<BookingResponseDto> getByState(Long userId, BookingStateDto state) {
         LocalDate now = LocalDate.now();
 
-        return (switch (state) {
+        Collection<Booking> bookings = switch (state) {
             case BookingStateDto.ALL -> bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
 
             case BookingStateDto.CURRENT ->
@@ -98,7 +98,9 @@ public class BookingServiceImpl implements BookingService {
                     bookingRepository.findAllByBookerIdAndStartIsAfterOrderByStartDesc(userId, now);
 
             default -> bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, state);
-        }).stream().map(BookingMapper::map).toList();
+        };
+
+        return bookings.stream().map(BookingMapper::map).toList();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("User don't have any items");
         }
 
-        return (switch (state) {
+        Collection<Booking> bookings = switch (state) {
             case BookingStateDto.ALL -> bookingRepository.findAllByItemOwnerIdOrderByStartDesc(userId);
 
             case BookingStateDto.CURRENT ->
@@ -122,6 +124,8 @@ public class BookingServiceImpl implements BookingService {
                     bookingRepository.findAllByItemOwnerIdAndStartIsAfterOrderByStartDesc(userId, LocalDate.now());
 
             default -> bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId, state);
-        }).stream().map(BookingMapper::map).toList();
+        };
+
+        return bookings.stream().map(BookingMapper::map).toList();
     }
 }
