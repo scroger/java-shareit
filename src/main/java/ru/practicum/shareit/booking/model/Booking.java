@@ -1,8 +1,7 @@
 package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -12,6 +11,9 @@ import java.time.LocalDateTime;
 @Table(schema = "public", name = "bookings")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,13 +36,6 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private Status status = Status.WAITING;
-
-    public enum Status {
-        WAITING,
-        APPROVED,
-        REJECTED,
-        CANCELED
-    }
+    private BookingStatus status = BookingStatus.WAITING;
 
 }

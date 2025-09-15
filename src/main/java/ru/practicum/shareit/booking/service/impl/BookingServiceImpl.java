@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingStateDto;
 import ru.practicum.shareit.booking.dto.CreateBookingRequestDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.error.exception.ForbiddenException;
@@ -56,11 +57,11 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDto approve(Long userId, Long bookingId, boolean approved) {
         Booking booking = getById(bookingId);
 
-        if (!Objects.equals(userId, booking.getItem().getOwnerId())) {
+        if (!Objects.equals(userId, booking.getItem().getOwner().getId())) {
             throw new ValidationException("Only the owner can approve booking");
         }
 
-        booking.setStatus(approved ? Booking.Status.APPROVED : Booking.Status.REJECTED);
+        booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
 
         return BookingMapper.map(bookingRepository.save(booking));
     }
@@ -75,7 +76,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = getById(bookingId);
 
         if (!Objects.equals(userId, booking.getBooker().getId())
-                && !Objects.equals(userId, booking.getItem().getOwnerId())) {
+                && !Objects.equals(userId, booking.getItem().getOwner().getId())) {
             throw new ForbiddenException("Only the owner of item or the booker can view this booking");
         }
 

@@ -9,13 +9,10 @@ import java.util.Optional;
 public class UserMapper {
 
     public static User map(CreateUserRequestDto createUserRequestDto) {
-        User user = new User();
-
-        user.setId(null);
-        user.setName(createUserRequestDto.name());
-        user.setEmail(createUserRequestDto.email());
-
-        return user;
+        return User.builder()
+                .name(createUserRequestDto.name())
+                .email(createUserRequestDto.email())
+                .build();
     }
 
     public static User map(UpdateUserRequestDto userRequestDto, User user) {

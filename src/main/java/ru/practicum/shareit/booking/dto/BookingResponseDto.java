@@ -1,7 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
 import lombok.Builder;
-import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -15,12 +15,10 @@ public record BookingResponseDto(
 
         LocalDateTime end,
 
-//        Long itemId,
         Item item,
 
-//        Long bookerId,
         User booker,
 
-        Booking.Status status
+        BookingStatus status
 ) {
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.comment.dto.CommentRequestDto;
 import ru.practicum.shareit.comment.dto.CommentResponseDto;
@@ -56,17 +57,17 @@ public class ItemServiceImpl implements ItemService {
 
         LocalDateTime lastBooking = null;
         LocalDateTime nextBooking = null;
-        if (Objects.equals(currentUserId, item.getOwnerId())) {
+        if (Objects.equals(currentUserId, item.getOwner().getId())) {
             LocalDateTime now = LocalDateTime.now();
             lastBooking = bookingRepository.findFirstByItemIdAndEndIsBeforeAndStatusOrderByEndDesc(
                     itemId,
                     now,
-                    Booking.Status.APPROVED
+                    BookingStatus.APPROVED
             ).map(Booking::getEnd).orElse(null);
             nextBooking = bookingRepository.findFirstByItemIdAndStartIsAfterAndStatusOrderByStartAsc(
                     itemId,
                     now,
-                    Booking.Status.APPROVED
+                    BookingStatus.APPROVED
             ).map(Booking::getStart).orElse(null);
         }
 
@@ -82,10 +83,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item create(Long userId, CreateItemRequestDto createItemRequestDto) {
-        userRepository.findById(userId)
+        User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
-        return itemRepository.save(ItemMapper.map(userId, createItemRequestDto));
+        return itemRepository.save(ItemMapper.map(owner, createItemRequestDto));
     }
 
     @Override
@@ -95,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = getById(itemId);
 
-        if (!Objects.equals(userId, item.getOwnerId())) {
+        if (!Objects.equals(userId, item.getOwner().getId())) {
             throw new ForbiddenException("Forbidden");
         }
 
@@ -122,7 +123,7 @@ public class ItemServiceImpl implements ItemService {
                 author.getId(),
                 item.getId(),
                 LocalDateTime.now(),
-                Booking.Status.APPROVED
+                BookingStatus.APPROVED
         )) {
             throw new ValidationException("Forbidden");
         }

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.booking.dto.BookingStateDto;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,20 +45,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findFirstByItemIdAndEndIsBeforeAndStatusOrderByEndDesc(
             Long itemId,
             LocalDateTime now,
-            Booking.Status status
+            BookingStatus status
     );
 
     Optional<Booking> findFirstByItemIdAndStartIsAfterAndStatusOrderByStartAsc(
             Long itemId,
             LocalDateTime now,
-            Booking.Status status
+            BookingStatus status
     );
 
     boolean existsByBookerIdAndItemIdAndEndIsBeforeAndStatus(
             Long bookerId,
             Long itemId,
             LocalDateTime now,
-            Booking.Status status
+            BookingStatus status
     );
 
 }

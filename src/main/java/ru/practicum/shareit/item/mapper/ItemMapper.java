@@ -4,22 +4,20 @@ import ru.practicum.shareit.item.dto.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Optional;
 
 public class ItemMapper {
 
-    public static Item map(Long ownerId, CreateItemRequestDto createItemDto) {
-        Item item = new Item();
-
-        item.setId(null);
-        item.setName(createItemDto.name());
-        item.setDescription(createItemDto.description());
-        item.setAvailable(createItemDto.available());
-        item.setOwnerId(ownerId);
-        item.setRequestId(createItemDto.requestId());
-
-        return item;
+    public static Item map(User owner, CreateItemRequestDto createItemDto) {
+        return Item.builder()
+                .name(createItemDto.name())
+                .description(createItemDto.description())
+                .available(createItemDto.available())
+                .owner(owner)
+                .requestId(createItemDto.requestId())
+                .build();
     }
 
     public static Item map(UpdateItemRequestDto updateItemDto, Item item) {
@@ -44,7 +42,7 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .ownerId(item.getOwnerId())
+                .ownerId(item.getOwner().getId())
                 .build();
     }
 
