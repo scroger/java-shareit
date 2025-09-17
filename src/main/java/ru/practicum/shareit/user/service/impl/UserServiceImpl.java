@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
                     createUserRequestDto.email()));
         }
 
-        return userRepository.create(UserMapper.map(createUserRequestDto));
+        return userRepository.save(UserMapper.map(createUserRequestDto));
     }
 
     @Override
@@ -47,16 +47,16 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
         String newEmail = updateUserRequestDto.email();
-        if (null != newEmail && !user.email().equalsIgnoreCase(newEmail) && userRepository.existsByEmail(newEmail)) {
+        if (null != newEmail && !user.getEmail().equalsIgnoreCase(newEmail) && userRepository.existsByEmail(newEmail)) {
             throw new AlreadyExistException(String.format("User with email=%s already exist", newEmail));
         }
 
-        return userRepository.update(UserMapper.map(updateUserRequestDto, user));
+        return userRepository.save(UserMapper.map(updateUserRequestDto, user));
     }
 
     @Override
     public void delete(Long userId) {
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 
 }
