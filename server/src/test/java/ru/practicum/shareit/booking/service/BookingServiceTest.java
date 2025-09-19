@@ -104,13 +104,11 @@ class BookingServiceTest {
 
         Mockito.when(itemService.getById(item.getId())).thenReturn(item);
 
-        Assertions.assertThrows(ItemNotAvailableException.class, () -> {
-            bookingService.create(CreateBookingRequestDto.builder()
-                    .itemId(item.getId())
-                    .start(LocalDateTime.now().plusDays(1))
-                    .end(LocalDateTime.now().plusDays(2))
-                    .build(), user.getId());
-        });
+        Assertions.assertThrows(ItemNotAvailableException.class, () -> bookingService.create(CreateBookingRequestDto.builder()
+                .itemId(item.getId())
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .build(), user.getId()));
     }
 
     @Test
@@ -131,9 +129,7 @@ class BookingServiceTest {
     void approveByNotOwner() {
         Mockito.when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
-        Assertions.assertThrows(ValidationException.class, () -> {
-            bookingService.approve(2L, booking.getId(), true);
-        });
+        Assertions.assertThrows(ValidationException.class, () -> bookingService.approve(2L, booking.getId(), true));
     }
 
     @Test
@@ -152,18 +148,14 @@ class BookingServiceTest {
     void getByIdByNotBookerOrOwner() {
         Mockito.when(bookingRepository.findById(booking.getId())).thenReturn(Optional.of(booking));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> {
-            bookingService.getById(booking.getId(), 2L);
-        });
+        Assertions.assertThrows(ForbiddenException.class, () -> bookingService.getById(booking.getId(), 2L));
     }
 
     @Test
     void getByIdNotFound() {
         Mockito.when(bookingRepository.findById(booking.getId())).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            bookingService.getById(booking.getId(), user.getId());
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.getById(booking.getId(), user.getId()));
     }
 
     @Test
@@ -202,8 +194,6 @@ class BookingServiceTest {
     void getMyByStateEmpty() {
         Mockito.when(itemService.getAll(user.getId())).thenReturn(Collections.emptyList());
 
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            bookingService.getMyByState(user.getId(), BookingStateDto.ALL);
-        });
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.getMyByState(user.getId(), BookingStateDto.ALL));
     }
 }
