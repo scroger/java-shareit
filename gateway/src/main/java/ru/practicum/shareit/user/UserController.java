@@ -24,7 +24,7 @@ import ru.practicum.shareit.user.dto.UpdateUserRequestDto;
 @Validated
 public class UserController {
 
-    public final UserClient userClient;
+    private final UserClient userClient;
 
     @GetMapping
     public ResponseEntity<Object> getAll() {

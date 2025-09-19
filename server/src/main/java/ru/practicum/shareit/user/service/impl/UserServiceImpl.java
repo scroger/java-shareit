@@ -18,7 +18,7 @@ import ru.practicum.shareit.user.service.UserService;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    public final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public Collection<User> getAll() {

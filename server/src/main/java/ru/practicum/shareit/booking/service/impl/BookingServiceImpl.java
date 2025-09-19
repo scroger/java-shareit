@@ -36,10 +36,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto create(CreateBookingRequestDto bookingRequest, Long userId) {
-        if (bookingRequest.start().isAfter(bookingRequest.end()) || bookingRequest.start().isEqual(bookingRequest.end())) {
-            throw new ValidationException("Invalid start/end date");
-        }
-
         Item item = itemService.getById(bookingRequest.itemId());
         if (!item.getAvailable()) {
             throw new ItemNotAvailableException("Item isn't available");

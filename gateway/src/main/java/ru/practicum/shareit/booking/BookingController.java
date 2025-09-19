@@ -45,6 +45,10 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> bookItem(@RequestHeader("X-Sharer-User-Id") long userId,
                                            @RequestBody @Valid BookItemRequestDto requestDto) {
+        if (requestDto.getStart().isAfter(requestDto.getEnd()) || requestDto.getStart().isEqual(requestDto.getEnd())) {
+            throw new IllegalArgumentException("Invalid start/end date");
+        }
+
         log.info("Creating booking {}, userId={}", requestDto, userId);
 
         return bookingClient.bookItem(userId, requestDto);

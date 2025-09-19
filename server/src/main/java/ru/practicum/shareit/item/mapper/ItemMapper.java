@@ -6,32 +6,33 @@ import ru.practicum.shareit.item.dto.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 public class ItemMapper {
 
-    public static Item map(User owner, CreateItemRequestDto createItemDto) {
+    public static Item map(User owner, CreateItemRequestDto dto, ItemRequest itemRequest) {
         return Item.builder()
-                .name(createItemDto.name())
-                .description(createItemDto.description())
-                .available(createItemDto.available())
+                .name(dto.name())
+                .description(dto.description())
+                .available(dto.available())
                 .owner(owner)
-                .requestId(createItemDto.requestId())
+                .request(itemRequest)
                 .build();
     }
 
-    public static Item map(UpdateItemRequestDto updateItemDto, Item item) {
-        Optional.ofNullable(updateItemDto.name())
+    public static Item map(UpdateItemRequestDto dto, Item item, ItemRequest itemRequest) {
+        Optional.ofNullable(dto.name())
                 .ifPresent(item::setName);
 
-        Optional.ofNullable(updateItemDto.description())
+        Optional.ofNullable(dto.description())
                 .ifPresent(item::setDescription);
 
-        Optional.ofNullable(updateItemDto.available())
+        Optional.ofNullable(dto.available())
                 .ifPresent(item::setAvailable);
 
-        Optional.ofNullable(updateItemDto.requestId())
-                .ifPresent(item::setRequestId);
+        Optional.ofNullable(itemRequest)
+                .ifPresent(item::setRequest);
 
         return item;
     }

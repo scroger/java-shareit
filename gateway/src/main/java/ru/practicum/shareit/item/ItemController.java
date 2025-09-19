@@ -26,7 +26,7 @@ import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
 @Validated
 public class ItemController {
 
-    public final ItemClient itemClient;
+    private final ItemClient itemClient;
 
     @GetMapping
     public ResponseEntity<Object> getAll(@RequestHeader("X-Sharer-User-Id") Long currentUserId) {

@@ -28,6 +28,8 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -36,10 +38,11 @@ import ru.practicum.shareit.user.repository.UserRepository;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    public final ItemRepository itemRepository;
-    public final UserRepository userRepository;
-    public final BookingRepository bookingRepository;
-    public final CommentRepository commentRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public Collection<Item> getAll(Long userId) {
@@ -83,15 +86,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item create(Long userId, CreateItemRequestDto createItemRequestDto) {
+    public Item create(Long userId, CreateItemRequestDto dto) {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
-        return itemRepository.save(ItemMapper.map(owner, createItemRequestDto));
+        ItemRequest itemRequest = null;
+        if (null != dto.requestId()) {
+            itemRequest = itemRequestRepository.findById(dto.requestId()).orElseThrow(
+                    () -> new NotFoundException(String.format("Item request with id=%d not found", dto.requestId()))
+            );
+        }
+
+        return itemRepository.save(ItemMapper.map(owner, dto, itemRequest));
     }
 
     @Override
-    public Item update(Long userId, Long itemId, UpdateItemRequestDto updateItemRequestDto) {
+    public Item update(Long userId, Long itemId, UpdateItemRequestDto dto) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
@@ -101,7 +111,14 @@ public class ItemServiceImpl implements ItemService {
             throw new ForbiddenException("Forbidden");
         }
 
-        return itemRepository.save(ItemMapper.map(updateItemRequestDto, item));
+        ItemRequest itemRequest = null;
+        if (null != dto.requestId()) {
+            itemRequest = itemRequestRepository.findById(dto.requestId()).orElseThrow(
+                    () -> new NotFoundException(String.format("Item request with id=%d not found", dto.requestId()))
+            );
+        }
+
+        return itemRepository.save(ItemMapper.map(dto, item, itemRequest));
     }
 
     @Override
