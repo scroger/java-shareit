@@ -127,7 +127,11 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return itemRepository.findBySearchText(searchText);
+//        return itemRepository.findBySearchText(searchText);
+        return itemRepository.findByAvailableTrueAndNameIgnoreCaseContainingOrDescriptionIgnoreCaseContaining(
+                searchText,
+                searchText
+        );
     }
 
     @Override

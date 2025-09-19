@@ -36,7 +36,7 @@ public class ItemRequest {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "requestor_id", insertable=false, updatable=false)
+    @Column(name = "requestor_id", insertable = false, updatable = false)
     private Long requestorId;
 
     @ManyToOne
