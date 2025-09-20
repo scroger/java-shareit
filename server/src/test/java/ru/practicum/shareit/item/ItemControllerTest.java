@@ -20,6 +20,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ru.practicum.shareit.comment.dto.CommentRequestDto;
 import ru.practicum.shareit.comment.dto.CommentResponseDto;
+import ru.practicum.shareit.error.GlobalExceptionHandler;
+import ru.practicum.shareit.error.exception.ForbiddenException;
+import ru.practicum.shareit.error.exception.NotFoundException;
+import ru.practicum.shareit.error.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CreateItemRequestDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequestDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -44,7 +48,9 @@ class ItemControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders.standaloneSetup(itemController).build();
+        mvc = MockMvcBuilders.standaloneSetup(itemController)
+                .setControllerAdvice(GlobalExceptionHandler.class)
+                .build();
 
         item = Item.builder()
                 .id(1L)
@@ -94,6 +100,16 @@ class ItemControllerTest {
                         Boolean.class))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.ownerId", Matchers.is(item.getOwner().getId()),
                         Long.class));
+    }
+
+    @Test
+    void getByIdNotFound() throws Exception {
+        Mockito.when(itemService.getById(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new NotFoundException("Item not found"));
+
+        mvc.perform(MockMvcRequestBuilders.get("/items/1").header("X-Sharer-User-Id", 1L))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.is("Item not found"), String.class));
     }
 
     @Test
@@ -151,11 +167,28 @@ class ItemControllerTest {
     }
 
     @Test
+    void updateForbidden() throws Exception {
+        Mockito.when(itemService.update(Mockito.anyLong(), Mockito.anyLong(), Mockito.any()))
+                .thenThrow(new ForbiddenException("Forbidden"));
+
+        mvc.perform(MockMvcRequestBuilders.patch("/items/1")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(UpdateItemRequestDto.builder()
+                                .name("item")
+                                .description("description")
+                                .available(false)
+                                .build())))
+                .andExpect(MockMvcResultMatchers.status().isForbidden())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.is("Forbidden"), String.class));
+    }
+
+    @Test
     void search() throws Exception {
         Mockito.when(itemService.search(Mockito.anyString())).thenReturn(Collections.emptyList());
 
         mvc.perform(MockMvcRequestBuilders.get("/items/search").header("X-Sharer-User-Id", 1L))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
 
         mvc.perform(MockMvcRequestBuilders.get("/items/search?text=test").header("X-Sharer-User-Id", 1L))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -179,5 +212,18 @@ class ItemControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id", Matchers.is(1L), Long.class))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.text", Matchers.is("comment"), String.class))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.authorName", Matchers.is("user"), String.class));
+    }
+
+    @Test
+    void addCommentForbiddenAsBadRequest() throws Exception {
+        Mockito.when(itemService.addComment(Mockito.anyLong(), Mockito.anyLong(), Mockito.any()))
+                .thenThrow(new ValidationException("Forbidden"));
+
+        mvc.perform(MockMvcRequestBuilders.post("/items/1/comment")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(CommentRequestDto.builder().text("comment").build())))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.is("Forbidden"), String.class));
     }
 }

@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ru.practicum.shareit.error.GlobalExceptionHandler;
+import ru.practicum.shareit.error.exception.AlreadyExistException;
 import ru.practicum.shareit.user.dto.CreateUserRequestDto;
 import ru.practicum.shareit.user.dto.UpdateUserRequestDto;
 import ru.practicum.shareit.user.model.User;
@@ -40,7 +42,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        mvc = MockMvcBuilders.standaloneSetup(userController).build();
+        mvc = MockMvcBuilders.standaloneSetup(userController)
+                .setControllerAdvice(GlobalExceptionHandler.class)
+                .build();
 
         user = User.builder()
                 .id(1L)
@@ -50,7 +54,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getAllTest() throws Exception {
+    void getAll() throws Exception {
         Mockito.when(userService.getAll()).thenReturn(Collections.singletonList(user));
 
         mvc.perform(MockMvcRequestBuilders.get("/users"))
@@ -61,7 +65,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getByIdTest() throws Exception {
+    void getById() throws Exception {
         Mockito.when(userService.getById(1L)).thenReturn(user);
 
         mvc.perform(MockMvcRequestBuilders.get("/users/1"))
@@ -72,7 +76,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createTest() throws Exception {
+    void create() throws Exception {
         Mockito.when(userService.create(Mockito.any())).thenReturn(user);
 
         mvc.perform(MockMvcRequestBuilders.post("/users")
@@ -88,7 +92,21 @@ class UserControllerTest {
     }
 
     @Test
-    void updateTest() throws Exception {
+    void createAlreadyExists() throws Exception {
+        Mockito.when(userService.create(Mockito.any())).thenThrow(new AlreadyExistException("User already exists"));
+
+        mvc.perform(MockMvcRequestBuilders.post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(CreateUserRequestDto.builder()
+                                .name("name")
+                                .email("email@email.com")
+                                .build())))
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error", Matchers.is("User already exists"), String.class));
+    }
+
+    @Test
+    void update() throws Exception {
         Mockito.when(userService.update(Mockito.anyLong(), Mockito.any())).thenReturn(user);
 
         mvc.perform(MockMvcRequestBuilders.patch("/users/1")
@@ -104,7 +122,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteTest() throws Exception {
+    void delete() throws Exception {
         Mockito.doNothing().when(userService).delete(Mockito.anyLong());
 
         mvc.perform(MockMvcRequestBuilders.delete("/users/1"))
